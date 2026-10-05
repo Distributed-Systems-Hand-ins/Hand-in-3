@@ -4,7 +4,7 @@
 // - protoc             v7.36.2
 // source: proto/chat.proto
 
-package gen
+package grpc
 
 import (
 	context "context"
@@ -19,29 +19,29 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ChatService_CreateStream_FullMethodName     = "/grpc.ChatService/CreateStream"
-	ChatService_BroadcastMessage_FullMethodName = "/grpc.ChatService/BroadcastMessage"
+	Broadcast_CreateStream_FullMethodName     = "/chat.Broadcast/CreateStream"
+	Broadcast_BroadcastMessage_FullMethodName = "/chat.Broadcast/BroadcastMessage"
 )
 
-// ChatServiceClient is the client API for ChatService service.
+// BroadcastClient is the client API for Broadcast service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ChatServiceClient interface {
+type BroadcastClient interface {
 	CreateStream(ctx context.Context, in *Connect, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Message], error)
 	BroadcastMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error)
 }
 
-type chatServiceClient struct {
+type broadcastClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewChatServiceClient(cc grpc.ClientConnInterface) ChatServiceClient {
-	return &chatServiceClient{cc}
+func NewBroadcastClient(cc grpc.ClientConnInterface) BroadcastClient {
+	return &broadcastClient{cc}
 }
 
-func (c *chatServiceClient) CreateStream(ctx context.Context, in *Connect, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Message], error) {
+func (c *broadcastClient) CreateStream(ctx context.Context, in *Connect, opts ...grpc.CallOption) (grpc.ServerStreamingClient[Message], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ChatService_ServiceDesc.Streams[0], ChatService_CreateStream_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Broadcast_ServiceDesc.Streams[0], Broadcast_CreateStream_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,106 +56,106 @@ func (c *chatServiceClient) CreateStream(ctx context.Context, in *Connect, opts 
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ChatService_CreateStreamClient = grpc.ServerStreamingClient[Message]
+type Broadcast_CreateStreamClient = grpc.ServerStreamingClient[Message]
 
-func (c *chatServiceClient) BroadcastMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error) {
+func (c *broadcastClient) BroadcastMessage(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Close, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Close)
-	err := c.cc.Invoke(ctx, ChatService_BroadcastMessage_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Broadcast_BroadcastMessage_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ChatServiceServer is the server API for ChatService service.
-// All implementations must embed UnimplementedChatServiceServer
+// BroadcastServer is the server API for Broadcast service.
+// All implementations must embed UnimplementedBroadcastServer
 // for forward compatibility.
-type ChatServiceServer interface {
+type BroadcastServer interface {
 	CreateStream(*Connect, grpc.ServerStreamingServer[Message]) error
 	BroadcastMessage(context.Context, *Message) (*Close, error)
-	mustEmbedUnimplementedChatServiceServer()
+	mustEmbedUnimplementedBroadcastServer()
 }
 
-// UnimplementedChatServiceServer must be embedded to have
+// UnimplementedBroadcastServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedChatServiceServer struct{}
+type UnimplementedBroadcastServer struct{}
 
-func (UnimplementedChatServiceServer) CreateStream(*Connect, grpc.ServerStreamingServer[Message]) error {
+func (UnimplementedBroadcastServer) CreateStream(*Connect, grpc.ServerStreamingServer[Message]) error {
 	return status.Error(codes.Unimplemented, "method CreateStream not implemented")
 }
-func (UnimplementedChatServiceServer) BroadcastMessage(context.Context, *Message) (*Close, error) {
+func (UnimplementedBroadcastServer) BroadcastMessage(context.Context, *Message) (*Close, error) {
 	return nil, status.Error(codes.Unimplemented, "method BroadcastMessage not implemented")
 }
-func (UnimplementedChatServiceServer) mustEmbedUnimplementedChatServiceServer() {}
-func (UnimplementedChatServiceServer) testEmbeddedByValue()                     {}
+func (UnimplementedBroadcastServer) mustEmbedUnimplementedBroadcastServer() {}
+func (UnimplementedBroadcastServer) testEmbeddedByValue()                   {}
 
-// UnsafeChatServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ChatServiceServer will
+// UnsafeBroadcastServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to BroadcastServer will
 // result in compilation errors.
-type UnsafeChatServiceServer interface {
-	mustEmbedUnimplementedChatServiceServer()
+type UnsafeBroadcastServer interface {
+	mustEmbedUnimplementedBroadcastServer()
 }
 
-func RegisterChatServiceServer(s grpc.ServiceRegistrar, srv ChatServiceServer) {
-	// If the following call panics, it indicates UnimplementedChatServiceServer was
+func RegisterBroadcastServer(s grpc.ServiceRegistrar, srv BroadcastServer) {
+	// If the following call panics, it indicates UnimplementedBroadcastServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&ChatService_ServiceDesc, srv)
+	s.RegisterService(&Broadcast_ServiceDesc, srv)
 }
 
-func _ChatService_CreateStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Broadcast_CreateStream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Connect)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ChatServiceServer).CreateStream(m, &grpc.GenericServerStream[Connect, Message]{ServerStream: stream})
+	return srv.(BroadcastServer).CreateStream(m, &grpc.GenericServerStream[Connect, Message]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type ChatService_CreateStreamServer = grpc.ServerStreamingServer[Message]
+type Broadcast_CreateStreamServer = grpc.ServerStreamingServer[Message]
 
-func _ChatService_BroadcastMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Broadcast_BroadcastMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Message)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ChatServiceServer).BroadcastMessage(ctx, in)
+		return srv.(BroadcastServer).BroadcastMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ChatService_BroadcastMessage_FullMethodName,
+		FullMethod: Broadcast_BroadcastMessage_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChatServiceServer).BroadcastMessage(ctx, req.(*Message))
+		return srv.(BroadcastServer).BroadcastMessage(ctx, req.(*Message))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ChatService_ServiceDesc is the grpc.ServiceDesc for ChatService service.
+// Broadcast_ServiceDesc is the grpc.ServiceDesc for Broadcast service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ChatService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.ChatService",
-	HandlerType: (*ChatServiceServer)(nil),
+var Broadcast_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "chat.Broadcast",
+	HandlerType: (*BroadcastServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "BroadcastMessage",
-			Handler:    _ChatService_BroadcastMessage_Handler,
+			Handler:    _Broadcast_BroadcastMessage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "CreateStream",
-			Handler:       _ChatService_CreateStream_Handler,
+			Handler:       _Broadcast_CreateStream_Handler,
 			ServerStreams: true,
 		},
 	},

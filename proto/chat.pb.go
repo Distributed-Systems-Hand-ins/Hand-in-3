@@ -4,7 +4,7 @@
 // 	protoc        v7.36.2
 // source: proto/chat.proto
 
-package gen
+package grpc
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -226,7 +226,7 @@ var File_proto_chat_proto protoreflect.FileDescriptor
 
 const file_proto_chat_proto_rawDesc = "" +
 	"\n" +
-	"\x10proto/chat.proto\x12\x04grpc\x1a\x1fgoogle/protobuf/timestamp.proto\"*\n" +
+	"\x10proto/chat.proto\x12\x04chat\x1a\x1fgoogle/protobuf/timestamp.proto\"*\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"m\n" +
@@ -236,12 +236,12 @@ const file_proto_chat_proto_rawDesc = "" +
 	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"A\n" +
 	"\aConnect\x12\x1e\n" +
 	"\x04user\x18\x01 \x01(\v2\n" +
-	".grpc.UserR\x04user\x12\x16\n" +
+	".chat.UserR\x04user\x12\x16\n" +
 	"\x06active\x18\x02 \x01(\bR\x06active\"\a\n" +
-	"\x05Close2m\n" +
-	"\vChatService\x12.\n" +
-	"\fCreateStream\x12\r.grpc.Connect\x1a\r.grpc.Message0\x01\x12.\n" +
-	"\x10BroadcastMessage\x12\r.grpc.Message\x1a\v.grpc.CloseB\x06Z\x04/genb\x06proto3"
+	"\x05Close2k\n" +
+	"\tBroadcast\x12.\n" +
+	"\fCreateStream\x12\r.chat.Connect\x1a\r.chat.Message0\x01\x12.\n" +
+	"\x10BroadcastMessage\x12\r.chat.Message\x1a\v.chat.CloseB\x0fZ\rchatroom/grpcb\x06proto3"
 
 var (
 	file_proto_chat_proto_rawDescOnce sync.Once
@@ -257,19 +257,19 @@ func file_proto_chat_proto_rawDescGZIP() []byte {
 
 var file_proto_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_proto_chat_proto_goTypes = []any{
-	(*User)(nil),                  // 0: grpc.User
-	(*Message)(nil),               // 1: grpc.Message
-	(*Connect)(nil),               // 2: grpc.Connect
-	(*Close)(nil),                 // 3: grpc.Close
+	(*User)(nil),                  // 0: chat.User
+	(*Message)(nil),               // 1: chat.Message
+	(*Connect)(nil),               // 2: chat.Connect
+	(*Close)(nil),                 // 3: chat.Close
 	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_proto_chat_proto_depIdxs = []int32{
-	4, // 0: grpc.Message.timestamp:type_name -> google.protobuf.Timestamp
-	0, // 1: grpc.Connect.user:type_name -> grpc.User
-	2, // 2: grpc.ChatService.CreateStream:input_type -> grpc.Connect
-	1, // 3: grpc.ChatService.BroadcastMessage:input_type -> grpc.Message
-	1, // 4: grpc.ChatService.CreateStream:output_type -> grpc.Message
-	3, // 5: grpc.ChatService.BroadcastMessage:output_type -> grpc.Close
+	4, // 0: chat.Message.timestamp:type_name -> google.protobuf.Timestamp
+	0, // 1: chat.Connect.user:type_name -> chat.User
+	2, // 2: chat.Broadcast.CreateStream:input_type -> chat.Connect
+	1, // 3: chat.Broadcast.BroadcastMessage:input_type -> chat.Message
+	1, // 4: chat.Broadcast.CreateStream:output_type -> chat.Message
+	3, // 5: chat.Broadcast.BroadcastMessage:output_type -> chat.Close
 	4, // [4:6] is the sub-list for method output_type
 	2, // [2:4] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

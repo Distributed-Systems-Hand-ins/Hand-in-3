@@ -1,4 +1,17 @@
-package server
+package main
+
+import (
+	"context"
+	"log"
+	"net"
+	"sync"
+	"fmt"
+	
+
+	"google.golang.org/grpc"
+
+	proto "chatroom/proto"
+)
 
 type Connection struct {
 	proto.UnimplementedBroadcastServer
@@ -11,6 +24,31 @@ type Connection struct {
 type Pool struct {
 	proto.UnimplementedBroadcastServer
 	Connection []*Connection
+}
+
+func main() {
+	//Create a server
+	grpcServer := grpc.NewServer()
+
+	//Create a new pool
+	pool := &Pool{}
+	
+
+	//Register the pool with the server
+	proto.RegisterBroadcastServer(grpcServer, pool)
+
+	//Create a listener on port 8080
+	listener, err := net.Listen("tcp", ":8080")
+
+	if err != nil {
+		log.Fatalf("Error creating the server %v", err)
+	}
+	fmt.Println("Server is running on port 8080")
+
+	//Start serving requests 
+	if err := grpcServer.Serve(listener); err != nil {
+		log.Fatalf("Error starting the server %v", err)
+	}
 }
 
 func (p *Pool) CreateStream(pconn *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
@@ -29,7 +67,7 @@ func (s *Pool) BroadcastMessage(ctx context.Context, msg *proto.Message) (*proto
 	wait := sync.WaitGroup{}
 	done := make(chan int)
 
-	for_, conn := range s.Conection {
+	for _, conn := range s.Connection {
 		wait.Add(1)
 
 		go func(msg *proto.Message, conn *Connection) {
@@ -42,7 +80,7 @@ func (s *Pool) BroadcastMessage(ctx context.Context, msg *proto.Message) (*proto
 				if err != nil {
 					fmt.Println("Error with Stream: %v - Error: %v\n", conn.stream, err)
 					conn.active = false
-					con.error <- err 
+					conn.error <- err 
 				}
 			}
 	} (msg, conn)
