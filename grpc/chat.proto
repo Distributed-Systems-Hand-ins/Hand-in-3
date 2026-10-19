@@ -2,7 +2,7 @@ syntax = "proto3";
 package chat;
 
 option go_package = "chatroom/grpc";
-import "google/protobuf/timestamp.proto";
+
 
 message User {
 	string id = 1;
@@ -10,14 +10,14 @@ message User {
 }
 
 message Message {
-	string id = 1;
+	string sender = 1;
 	string content = 2;
-	google.protobuf.Timestamp timestamp = 3;
+	int64 lamport = 3;
 }
 
 message Connect {
 	User user = 1;
-	bool active = 2;
+	int64 lamport = 2;
 }
 
 message Close {}
