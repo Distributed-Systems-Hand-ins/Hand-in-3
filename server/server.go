@@ -90,7 +90,7 @@ func (p *Pool) CreateStream (req *proto.Connect, stream proto.Broadcast_CreateSt
 		p.clock++ // Send event, join response
 		p.Broadcast(&proto.Message{
 			Sender: "Server",
-			Content: fmt.Sprintf("Participant %s has joined the chat at logical time %d", name, p.clock),
+			Content: fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", name, p.clock),
 		Lamport: p.clock,
 	})
 	log.Printf("[Server] event=join name=%s lamport=%d", name, p.clock)
@@ -103,7 +103,7 @@ func (p *Pool) CreateStream (req *proto.Connect, stream proto.Broadcast_CreateSt
 		p.clock++ // Send event, leave message
 		p.Broadcast(&proto.Message{
 			Sender: "Server",
-	        Content: fmt.Sprintf("Participant %s has left the chat at logical time %d", name, p.clock),
+	        Content: fmt.Sprintf("Participant %s left Chit Chat at logical time %d", name, p.clock),
 			Lamport: p.clock,
 		})
 		log.Printf("[Server] event=leave name=%s lamport=%d", name, p.clock)
