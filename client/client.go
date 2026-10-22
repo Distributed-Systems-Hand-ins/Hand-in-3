@@ -34,8 +34,8 @@ func main() {
 	log.SetOutput(logFile)
 
 	// Connect to the server
-	conn, err := grpc.NewClient("localhost:8080", 
-    grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("localhost:8080",
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("[Client %s] event=error err=%v", *name, err)
 	}
@@ -46,7 +46,7 @@ func main() {
 
 	//Join: sending the join request is a send event
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel() 
+	defer cancel()
 	clock++
 	stream, err := client.CreateStream(ctx, &proto.Connect{User: &proto.User{Name: *name}, Lamport: clock})
 	if err != nil {
@@ -68,12 +68,12 @@ func main() {
 				return
 			}
 			incoming <- msg
-		
+
 		}
 	}()
 
 	//Goroutine 2: Reads lines from the keyboard and hands them to the main loop
-	input := make (chan string)
+	input := make(chan string)
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
@@ -86,7 +86,7 @@ func main() {
 	signal.Notify(interrupt, os.Interrupt)
 
 	//Main loop: handles whichever of these happens next
-	loop: 
+loop:
 	for {
 		select {
 		case msg := <-incoming:
@@ -94,8 +94,8 @@ func main() {
 
 			//Show the message and its timestamp, and log them
 			fmt.Printf("[%d] %s: %s\n", msg.Lamport, msg.Sender, msg.Content)
-			log.Printf("[Client %s] event=receive sender=%s lamport=%d clock=%d content=%q", 
-		*name, msg.Sender, msg.Lamport, clock, msg.Content)
+			log.Printf("[Client %s] event=receive sender=%s lamport=%d clock=%d content=%q",
+				*name, msg.Sender, msg.Lamport, clock, msg.Content)
 		case text := <-input:
 			if text == "/leave" {
 				break loop
@@ -112,7 +112,7 @@ func main() {
 			}
 			log.Printf("[Client %s] event=publish lamport=%d content=%q", *name, clock, text)
 
-		case <- interrupt:
+		case <-interrupt:
 			break loop
 
 		case err := <-disconnected:

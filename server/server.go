@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-	"log"
-	"net"
-	"sync"
 	"fmt"
 	"io"
+	"log"
+	"net"
 	"os"
 	"os/signal"
+	"sync"
 	"unicode/utf8"
-	
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -19,16 +18,13 @@ import (
 	proto "chatroom/grpc"
 )
 
-
-
-
 // Pool is a struct that holds the state of the server and manages the connected clients.
 type Pool struct {
 	proto.UnimplementedBroadcastServer
-	
-	mu sync.Mutex                             // guards clock and clients
-	clock int64                               // the server's Lamport clock
-	clients map[string]chan *proto.Message    // participant name -> outbox
+
+	mu      sync.Mutex                     // guards clock and clients
+	clock   int64                          // the server's Lamport clock
+	clients map[string]chan *proto.Message // participant name -> outbox
 }
 
 func main() {
@@ -42,11 +38,11 @@ func main() {
 
 	//Create a server pool to manage connected clients
 	grpcServer := grpc.NewServer()
-    pool := &Pool{clients: make(map[string]chan *proto.Message)}
+	pool := &Pool{clients: make(map[string]chan *proto.Message)}
 	proto.RegisterBroadcastServer(grpcServer, pool)
 
 	// Listen for incoming connections on port 8080
-	listener, err := net.Listen("tcp", ":8080")
+	listener, err := net.Listen("tcp", "localhost:8080")
 	if err != nil {
 		log.Fatalf("Failed to listen on port 8080: %v", err)
 	}
@@ -59,7 +55,7 @@ func main() {
 	}()
 
 	// Start serving incoming connections
-	log.Printf("[Server] event=startup adress=%s", listener.Addr())
+	log.Printf("[Server] event=startup address=%s", listener.Addr())
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("[Server] event=error err=%v", err)
 	}
@@ -72,7 +68,7 @@ func (p *Pool) Broadcast(msg *proto.Message) {
 	}
 }
 
-func (p *Pool) CreateStream (req *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
+func (p *Pool) CreateStream(req *proto.Connect, stream proto.Broadcast_CreateStreamServer) error {
 	name := req.GetUser().GetName()
 	if name == "" {
 		return status.Error(codes.InvalidArgument, "name cannot be empty")
@@ -83,14 +79,15 @@ func (p *Pool) CreateStream (req *proto.Connect, stream proto.Broadcast_CreateSt
 	p.mu.Lock()
 	if _, taken := p.clients[name]; taken {
 		p.mu.Unlock()
-		return status.Error(codes.AlreadyExists, "name already taken") }
-		
-		p.clock = max(p.clock, req.Lamport) + 1 // receive event, join request
-		p.clients[name] = outbox
-		p.clock++ // Send event, join response
-		p.Broadcast(&proto.Message{
-			Sender: "Server",
-			Content: fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", name, p.clock),
+		return status.Error(codes.AlreadyExists, "name already taken")
+	}
+
+	p.clock = max(p.clock, req.Lamport) + 1 // receive event, join request
+	p.clients[name] = outbox
+	p.clock++ // Send event, join response
+	p.Broadcast(&proto.Message{
+		Sender:  "Server",
+		Content: fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", name, p.clock),
 		Lamport: p.clock,
 	})
 	log.Printf("[Server] event=join name=%s lamport=%d", name, p.clock)
@@ -100,10 +97,10 @@ func (p *Pool) CreateStream (req *proto.Connect, stream proto.Broadcast_CreateSt
 	defer func() {
 		p.mu.Lock()
 		delete(p.clients, name) // Remove first, so they don't get their own leave message
-		p.clock++ // Send event, leave message
+		p.clock++               // Send event, leave message
 		p.Broadcast(&proto.Message{
-			Sender: "Server",
-	        Content: fmt.Sprintf("Participant %s left Chit Chat at logical time %d", name, p.clock),
+			Sender:  "Server",
+			Content: fmt.Sprintf("Participant %s left Chit Chat at logical time %d", name, p.clock),
 			Lamport: p.clock,
 		})
 		log.Printf("[Server] event=leave name=%s lamport=%d", name, p.clock)
@@ -118,13 +115,14 @@ func (p *Pool) CreateStream (req *proto.Connect, stream proto.Broadcast_CreateSt
 				return err
 			}
 			log.Printf("[Server] event=deliver client=%s sender=%s lamport=%d", name, msg.Sender, msg.Lamport)
-			case <- stream.Context().Done():
-				return nil // The participant disconnected
+		case <-stream.Context().Done():
+			return nil // The participant disconnected
 		}
 	}
 }
+
 // BroadcastMessage is called by a participant to send a message to all other participants
-func (p *Pool) BroadcastMessage (ctx context.Context, msg *proto.Message) (*proto.Close, error) {
+func (p *Pool) BroadcastMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
 	// A valid message is UTF-8 and at most 128 characters
 	if !utf8.ValidString(msg.Content) || utf8.RuneCountInString(msg.Content) > 128 {
 		log.Printf("[Server] event=reject client=%s reason=invalid_message", msg.Sender)
@@ -134,9 +132,9 @@ func (p *Pool) BroadcastMessage (ctx context.Context, msg *proto.Message) (*prot
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.clock = max(p.clock, msg.Lamport) + 1 // receive event, broadcast request
-	p.clock++ // send event, broadcast message
+	p.clock++                               // send event, broadcast message
 	p.Broadcast(&proto.Message{
-		Sender: msg.Sender,
+		Sender:  msg.Sender,
 		Content: msg.Content,
 		Lamport: p.clock,
 	})
