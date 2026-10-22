@@ -25,6 +25,7 @@ type Pool struct {
 	mu      sync.Mutex                     // guards clock and clients
 	clock   int64                          // the server's Lamport clock
 	clients map[string]chan *proto.Message // participant name -> outbox
+	closing bool						   // true once the server is shutting down
 }
 
 func main() {
@@ -50,6 +51,9 @@ func main() {
 	signal.Notify(stop, os.Interrupt)
 	go func() {
 		<-stop
+		pool.mu.Lock()
+		pool.closing = true
+		pool.mu.Unlock()
 		log.Printf("[Server] event=shutdown")
 		grpcServer.Stop()
 	}()
@@ -61,10 +65,15 @@ func main() {
 	}
 }
 
-// Broadcast puts msg in every participant's outbox
+// Broadcast puts msg in every participant's outbox. Must be called with p.mu held.
+// The send never blocks: if a participant's outbox is full the message is dropped for them.
 func (p *Pool) Broadcast(msg *proto.Message) {
-	for _, outbox := range p.clients {
-		outbox <- msg
+	for name, outbox := range p.clients {
+		select {
+		case outbox <- msg:
+		default:
+			log.Printf("[Server] event=drop client=%s lamport=%d reason=outbox_full", name, msg.Lamport)
+		}
 	}
 }
 
@@ -84,27 +93,32 @@ func (p *Pool) CreateStream(req *proto.Connect, stream proto.Broadcast_CreateStr
 
 	p.clock = max(p.clock, req.Lamport) + 1 // receive event, join request
 	p.clients[name] = outbox
+	log.Printf("[Server] event=connect client=%s lamport=%d", name, p.clock)
 	p.clock++ // Send event, join response
 	p.Broadcast(&proto.Message{
 		Sender:  "Server",
 		Content: fmt.Sprintf("Participant %s joined Chit Chat at logical time %d", name, p.clock),
 		Lamport: p.clock,
 	})
-	log.Printf("[Server] event=join name=%s lamport=%d", name, p.clock)
+	log.Printf("[Server] event=broadcast_join client=%s lamport=%d", name, p.clock)
 	p.mu.Unlock()
 
-	//Leave: runs when the participant leaves the chatroom
+	// Leave: runs when the participant leaves the chatroom
 	defer func() {
 		p.mu.Lock()
+		defer p.mu.Unlock()
+		if p.closing {
+			return // server is shutting down, nobody is left to tell
+		}
 		delete(p.clients, name) // Remove first, so they don't get their own leave message
-		p.clock++               // Send event, leave message
+		log.Printf("[Server] event=disconnect client=%s", name)
+		p.clock++ // Send event, leave message
 		p.Broadcast(&proto.Message{
 			Sender:  "Server",
 			Content: fmt.Sprintf("Participant %s left Chit Chat at logical time %d", name, p.clock),
 			Lamport: p.clock,
 		})
-		log.Printf("[Server] event=leave name=%s lamport=%d", name, p.clock)
-		p.mu.Unlock()
+		log.Printf("[Server] event=broadcast_leave client=%s lamport=%d", name, p.clock)
 	}()
 
 	// Deliver: this goroutine delivers messages to the participant's stream
@@ -121,7 +135,7 @@ func (p *Pool) CreateStream(req *proto.Connect, stream proto.Broadcast_CreateStr
 	}
 }
 
-// BroadcastMessage is called by a participant to send a message to all other participants
+// BroadcastMessage is called by a participant to send a message to all participants
 func (p *Pool) BroadcastMessage(ctx context.Context, msg *proto.Message) (*proto.Close, error) {
 	// A valid message is UTF-8 and at most 128 characters
 	if !utf8.ValidString(msg.Content) || utf8.RuneCountInString(msg.Content) > 128 {
@@ -131,6 +145,10 @@ func (p *Pool) BroadcastMessage(ctx context.Context, msg *proto.Message) (*proto
 
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	if _, joined := p.clients[msg.Sender]; !joined {
+		log.Printf("[Server] event=reject client=%s reason=not_joined", msg.Sender)
+		return nil, status.Error(codes.PermissionDenied, "you have not joined Chit Chat")
+	}
 	p.clock = max(p.clock, msg.Lamport) + 1 // receive event, broadcast request
 	p.clock++                               // send event, broadcast message
 	p.Broadcast(&proto.Message{

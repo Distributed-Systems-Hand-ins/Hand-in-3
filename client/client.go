@@ -54,7 +54,7 @@ func main() {
 		log.Printf("[Client %s] event=error err=%q", *name, status.Convert(err).Message())
 		return
 	}
-	log.Printf("[Client %s] event=join lamport=%d", *name, clock)
+	log.Printf("[Client %s] event=connect lamport=%d", *name, clock)
 	fmt.Println("Type a message and press Enter. Type /leave or press Ctrl+C to leave")
 
 	//Goroutine 1: receive messages from the server and hands them to the main loop
@@ -79,6 +79,7 @@ func main() {
 		for scanner.Scan() {
 			input <- scanner.Text()
 		}
+		close(input) // stdin closed (Ctrl+D): tell the main loop to leave
 	}()
 
 	//Ctrl+C also means leave
@@ -96,8 +97,8 @@ loop:
 			fmt.Printf("[%d] %s: %s\n", msg.Lamport, msg.Sender, msg.Content)
 			log.Printf("[Client %s] event=receive sender=%s lamport=%d clock=%d content=%q",
 				*name, msg.Sender, msg.Lamport, clock, msg.Content)
-		case text := <-input:
-			if text == "/leave" {
+		case text, ok := <-input:
+			if !ok || text == "/leave" {
 				break loop
 			}
 			if text == "" {
