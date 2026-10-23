@@ -1,0 +1,7 @@
+2026/10/23 14:51:56 [Client Simon] event=connect lamport=1
+2026/10/23 14:51:56 [Client Simon] event=receive sender=Server lamport=11 clock=12 content="Participant Simon joined Chit Chat at logical time 11"
+2026/10/23 14:52:06 [Client Simon] event=publish lamport=13 content="hello"
+2026/10/23 14:52:06 [Client Simon] event=receive sender=Simon lamport=15 clock=16 content="hello"
+2026/10/23 14:52:43 [Client Simon] event=receive sender=Server lamport=16 clock=17 content="Participant Filip left Chit Chat at logical time 16"
+2026/10/23 14:53:42 [Client Simon] event=rejected lamport=18 err="messages must be UTF-8 and at most 128 characters"
+2026/10/23 14:54:02 [Client Simon] event=disconnected err="error reading from server: EOF"

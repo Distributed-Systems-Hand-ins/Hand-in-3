@@ -1,0 +1,6 @@
+2026/10/23 14:51:14 [Client Filip] event=connect lamport=1
+2026/10/23 14:51:14 [Client Filip] event=receive sender=Server lamport=5 clock=6 content="Participant Filip joined Chit Chat at logical time 5"
+2026/10/23 14:51:21 [Client Filip] event=receive sender=Daniel lamport=9 clock=10 content="hello"
+2026/10/23 14:51:56 [Client Filip] event=receive sender=Server lamport=11 clock=12 content="Participant Simon joined Chit Chat at logical time 11"
+2026/10/23 14:52:06 [Client Filip] event=receive sender=Simon lamport=15 clock=16 content="hello"
+2026/10/23 14:52:43 [Client Filip] event=leave lamport=17

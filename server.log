@@ -1,0 +1,26 @@
+2026/10/23 14:50:36 [Server] event=startup address=127.0.0.1:8080
+2026/10/23 14:50:53 [Server] event=connect client=Daniel lamport=2
+2026/10/23 14:50:53 [Server] event=broadcast_join client=Daniel lamport=3
+2026/10/23 14:50:53 [Server] event=deliver client=Daniel sender=Server lamport=3
+2026/10/23 14:51:14 [Server] event=connect client=Filip lamport=4
+2026/10/23 14:51:14 [Server] event=broadcast_join client=Filip lamport=5
+2026/10/23 14:51:14 [Server] event=deliver client=Filip sender=Server lamport=5
+2026/10/23 14:51:14 [Server] event=deliver client=Daniel sender=Server lamport=5
+2026/10/23 14:51:21 [Server] event=publish client=Daniel lamport=9
+2026/10/23 14:51:21 [Server] event=deliver client=Daniel sender=Daniel lamport=9
+2026/10/23 14:51:21 [Server] event=deliver client=Filip sender=Daniel lamport=9
+2026/10/23 14:51:56 [Server] event=connect client=Simon lamport=10
+2026/10/23 14:51:56 [Server] event=broadcast_join client=Simon lamport=11
+2026/10/23 14:51:56 [Server] event=deliver client=Simon sender=Server lamport=11
+2026/10/23 14:51:56 [Server] event=deliver client=Daniel sender=Server lamport=11
+2026/10/23 14:51:56 [Server] event=deliver client=Filip sender=Server lamport=11
+2026/10/23 14:52:06 [Server] event=publish client=Simon lamport=15
+2026/10/23 14:52:06 [Server] event=deliver client=Daniel sender=Simon lamport=15
+2026/10/23 14:52:06 [Server] event=deliver client=Filip sender=Simon lamport=15
+2026/10/23 14:52:06 [Server] event=deliver client=Simon sender=Simon lamport=15
+2026/10/23 14:52:43 [Server] event=disconnect client=Filip
+2026/10/23 14:52:43 [Server] event=broadcast_leave client=Filip lamport=16
+2026/10/23 14:52:43 [Server] event=deliver client=Simon sender=Server lamport=16
+2026/10/23 14:52:43 [Server] event=deliver client=Daniel sender=Server lamport=16
+2026/10/23 14:53:42 [Server] event=reject client=Simon reason=invalid_message
+2026/10/23 14:54:02 [Server] event=shutdown

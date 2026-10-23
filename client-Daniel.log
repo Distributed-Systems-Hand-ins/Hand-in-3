@@ -1,0 +1,9 @@
+2026/10/23 14:50:53 [Client Daniel] event=connect lamport=1
+2026/10/23 14:50:53 [Client Daniel] event=receive sender=Server lamport=3 clock=4 content="Participant Daniel joined Chit Chat at logical time 3"
+2026/10/23 14:51:14 [Client Daniel] event=receive sender=Server lamport=5 clock=6 content="Participant Filip joined Chit Chat at logical time 5"
+2026/10/23 14:51:21 [Client Daniel] event=publish lamport=7 content="hello"
+2026/10/23 14:51:21 [Client Daniel] event=receive sender=Daniel lamport=9 clock=10 content="hello"
+2026/10/23 14:51:56 [Client Daniel] event=receive sender=Server lamport=11 clock=12 content="Participant Simon joined Chit Chat at logical time 11"
+2026/10/23 14:52:06 [Client Daniel] event=receive sender=Simon lamport=15 clock=16 content="hello"
+2026/10/23 14:52:43 [Client Daniel] event=receive sender=Server lamport=16 clock=17 content="Participant Filip left Chit Chat at logical time 16"
+2026/10/23 14:54:02 [Client Daniel] event=disconnected err="error reading from server: EOF"
